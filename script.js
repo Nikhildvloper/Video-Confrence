@@ -14,7 +14,7 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true })
     console.error('Error accessing media devices:', error);
   });
 
-// Make the self-view draggable
+// Draggable Self View Logic
 const selfView = document.querySelector('.self-view');
 let isDragging = false, startX, startY, initialX, initialY;
 
@@ -31,11 +31,38 @@ document.addEventListener('mousemove', (e) => {
   if (!isDragging) return;
   const dx = e.clientX - startX;
   const dy = e.clientY - startY;
-  selfView.style.left = `${initialX + dx}px`;
-  selfView.style.top = `${initialY + dy}px`;
+  
+  // Constrain movement within the screen
+  const containerRect = document.body.getBoundingClientRect();
+  const selfRect = selfView.getBoundingClientRect();
+
+  const newX = Math.min(
+    containerRect.width - selfRect.width,
+    Math.max(0, initialX + dx)
+  );
+  const newY = Math.min(
+    containerRect.height - selfRect.height,
+    Math.max(0, initialY + dy)
+  );
+
+  selfView.style.left = `${newX}px`;
+  selfView.style.top = `${newY}px`;
 });
 
 document.addEventListener('mouseup', () => {
   isDragging = false;
   selfView.style.cursor = 'grab';
+});
+
+// Adjust Popup Position on Resize
+window.addEventListener('resize', () => {
+  const containerRect = document.body.getBoundingClientRect();
+  const selfRect = selfView.getBoundingClientRect();
+
+  if (selfRect.right > containerRect.width) {
+    selfView.style.left = `${containerRect.width - selfRect.width}px`;
+  }
+  if (selfRect.bottom > containerRect.height) {
+    selfView.style.top = `${containerRect.height - selfRect.height}px`;
+  }
 });
