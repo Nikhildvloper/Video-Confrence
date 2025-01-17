@@ -22,13 +22,13 @@ body, html {
   object-fit: cover;
 }
 
-/* Popup for Self View */
+/* Popup for Self View in Portrait Mode */
 .self-view {
   position: absolute;
-  bottom: 20px; /* Added bottom gap */
-  right: 20px;
-  width: 20vw; /* Popup width based on screen width */
-  aspect-ratio: 16 / 9; /* Maintain aspect ratio */
+  bottom: 20px; /* Bottom gap */
+  right: 20px; /* Right gap */
+  height: 30vh; /* Height based on viewport height */
+  aspect-ratio: 9 / 16; /* Portrait aspect ratio */
   background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   overflow: hidden;
@@ -49,7 +49,7 @@ body, html {
 /* Responsive Adjustments */
 @media (max-width: 600px) {
   .self-view {
-    width: 30vw; /* Smaller popup for narrow screens */
+    height: 40vh; /* Adjusted for smaller screens */
   }
 }
 
