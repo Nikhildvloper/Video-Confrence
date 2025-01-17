@@ -9,7 +9,7 @@
   <style>
     body { font-family: Arial, sans-serif; text-align: center; }
     .container { margin-top: 50px; }
-    textarea { width: 80%; height: 50px; margin-bottom: 20px; }
+    textarea { width: 80%; height: 150px; margin-bottom: 20px; }
     .btn { background-color: #4CAF50; color: white; padding: 15px 20px; border: none; cursor: pointer; }
     .btn:hover { background-color: #45a049; }
   </style>
@@ -17,7 +17,7 @@
 <body>
   <div class="container">
     <h1>Create Room</h1>
-    <textarea id="roomName" placeholder="Enter room name..."></textarea>
+    <textarea id="roomName" placeholder="Enter room name..." oninput="syncText()"></textarea>
     <button class="btn" id="createButton">Create Room</button>
     <p id="message"></p>
   </div>
@@ -41,6 +41,22 @@
     const createButton = document.getElementById('createButton');
     const roomNameInput = document.getElementById('roomName');
     const message = document.getElementById('message');
+
+    // Sync text in real-time
+    function syncText() {
+      const text = roomNameInput.value.trim();
+      const roomRef = database.ref('currentText');
+      roomRef.set(text);
+    }
+
+    // Listen for real-time text updates
+    const roomRef = database.ref('currentText');
+    roomRef.on('value', (snapshot) => {
+      const currentText = snapshot.val();
+      if (currentText !== null && currentText !== roomNameInput.value.trim()) {
+        roomNameInput.value = currentText; // Update text area with the new value
+      }
+    });
 
     createButton.addEventListener('click', () => {
       const roomName = roomNameInput.value.trim();
