@@ -25,10 +25,10 @@ body, html {
 /* Popup for Self View */
 .self-view {
   position: absolute;
-  bottom: 20px;
+  bottom: 20px; /* Added bottom gap */
   right: 20px;
-  width: 200px;
-  height: 150px;
+  width: 20vw; /* Popup width based on screen width */
+  aspect-ratio: 16 / 9; /* Maintain aspect ratio */
   background: rgba(0, 0, 0, 0.5);
   border-radius: 10px;
   overflow: hidden;
@@ -49,15 +49,12 @@ body, html {
 /* Responsive Adjustments */
 @media (max-width: 600px) {
   .self-view {
-    width: 120px;
-    height: 90px;
-    bottom: 10px;
-    right: 10px;
+    width: 30vw; /* Smaller popup for narrow screens */
   }
 }
 
 @media (max-height: 500px) {
   .self-view {
-    bottom: 10px;
+    bottom: 10px; /* Adjust bottom gap for short screens */
   }
 }
