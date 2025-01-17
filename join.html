@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Join Room</title>
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .rooms {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .room-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      color: white;
+      background-color: #1d557d;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .room-btn:hover {
+      background-color: #164962;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Join a Room</h1>
+    <div class="rooms" id="roomsContainer">
+      <!-- Room buttons will be dynamically added here -->
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
+  authDomain: "video-confrence-9e131.firebaseapp.com",
+  databaseURL: "https://video-confrence-9e131-default-rtdb.firebaseio.com",
+  projectId: "video-confrence-9e131",
+  storageBucket: "video-confrence-9e131.firebasestorage.app",
+  messagingSenderId: "299971534260",
+  appId: "1:299971534260:web:2a751958721d1181c3a6e1",
+  measurementId: "G-YHZFY3TSMT"
+};
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // DOM Elements
+    const roomsContainer = document.getElementById('roomsContainer');
+
+    // Function to fetch rooms and display them as buttons
+    function fetchRooms() {
+      firebase.database().ref('rooms').get().then((snapshot) => {
+        if (snapshot.exists()) {
+          const roomsData = snapshot.val();
+          // Clear current room buttons
+          roomsContainer.innerHTML = '';
+          // Add each room as a button
+          Object.keys(roomsData).forEach((roomName) => {
+            const button = document.createElement('button');
+            button.textContent = roomName;
+            button.className = 'room-btn';
+            button.onclick = () => {
+              alert(`Joining room: ${roomName}`);
+              // Add your room joining logic here
+            };
+            roomsContainer.appendChild(button);
+          });
+        } else {
+          roomsContainer.innerHTML = '<p>No rooms available.</p>';
+        }
+      }).catch((error) => {
+        console.error("Error fetching rooms:", error);
+      });
+    }
+
+    // Continuously fetch rooms every second
+    setInterval(fetchRooms, 1000);
+  </script>
+</body>
+</html>
