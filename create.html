@@ -4,25 +4,73 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Create Room</title>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    .container { margin-top: 50px; }
-    textarea { width: 80%; height: 150px; margin-bottom: 20px; }
-    .btn { background-color: #4CAF50; color: white; padding: 15px 20px; border: none; cursor: pointer; }
-    .btn:hover { background-color: #45a049; }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .container h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #1d557d;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #164962;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Create Room</h1>
-    <textarea id="roomName" placeholder="Enter room name..." oninput="syncText()"></textarea>
-    <button class="btn" id="createButton">Create Room</button>
-    <p id="message"></p>
+    <textarea id="textArea" placeholder="Type something..."></textarea>
+    <br>
+    <button class="btn" id="createButton">Create</button>
   </div>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
   <script>
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
       authDomain: "video-confrence-9e131.firebaseapp.com",
@@ -38,52 +86,24 @@
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    const textArea = document.getElementById('textArea');
     const createButton = document.getElementById('createButton');
-    const roomNameInput = document.getElementById('roomName');
-    const message = document.getElementById('message');
 
-    // Sync text in real-time
-    function syncText() {
-      const text = roomNameInput.value.trim();
-      const roomRef = database.ref('currentText');
-      roomRef.set(text);
-    }
+    // Reference to the Firebase Realtime Database location for the room's text
+    const roomRef = database.ref('room/text');
 
-    // Listen for real-time text updates
-    const roomRef = database.ref('currentText');
-    roomRef.on('value', (snapshot) => {
-      const currentText = snapshot.val();
-      if (currentText !== null && currentText !== roomNameInput.value.trim()) {
-        roomNameInput.value = currentText; // Update text area with the new value
-      }
+    // Sync text area changes to Firebase
+    createButton.addEventListener('click', () => {
+      const text = textArea.value;
+      roomRef.set(text); // Sync the text to the database
     });
 
-    createButton.addEventListener('click', () => {
-      const roomName = roomNameInput.value.trim();
-      if (roomName === "") {
-        message.textContent = "Room name cannot be empty!";
-        message.style.color = "red";
-        return;
+    // Sync Firebase text changes to the text area
+    roomRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data !== null) {
+        textArea.value = data; // Update the text area with the synced value
       }
-
-      const roomRef = database.ref('rooms/' + roomName);
-
-      roomRef.once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          message.textContent = "Room already exists!";
-          message.style.color = "red";
-        } else {
-          roomRef.set({
-            createdAt: new Date().toISOString()
-          }).then(() => {
-            message.textContent = "Room created successfully!";
-            message.style.color = "green";
-          }).catch((error) => {
-            message.textContent = "Error: " + error.message;
-            message.style.color = "red";
-          });
-        }
-      });
     });
   </script>
 </body>
