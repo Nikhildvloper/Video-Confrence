@@ -1,4 +1,4 @@
-// Firebase Configuration (using your provided details)
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
   authDomain: "video-confrence-9e131.firebaseapp.com",
@@ -16,12 +16,12 @@ const db = firebase.firestore();
 // WebRTC Configuration
 const servers = {
   iceServers: [
-    { urls: "stun:stun.l.google.com:19302" } // STUN server for NAT traversal
+    { urls: "stun:stun.l.google.com:19302" }
   ]
 };
 const peerConnection = new RTCPeerConnection(servers);
 
-// HTML Elements
+// Select video elements
 const selfVideo = document.getElementById('selfVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 
@@ -32,31 +32,39 @@ const answerCandidates = callDoc.collection('answerCandidates');
 
 // Media Streams
 let localStream = null;
-let remoteStream = null;
+let remoteStream = new MediaStream();
+remoteVideo.srcObject = remoteStream;
 
-// Access Camera and Microphone
+// Access local media (self-view)
 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-  .then(stream => {
-    // Set up local video
+  .then((stream) => {
+    console.log('Local stream started');
     localStream = stream;
     selfVideo.srcObject = stream;
 
     // Add local stream tracks to the peer connection
-    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+    localStream.getTracks().forEach((track) => {
+      peerConnection.addTrack(track, localStream);
+    });
   })
-  .catch(error => console.error('Error accessing media devices:', error));
+  .catch((error) => {
+    console.error('Error accessing media devices:', error);
+    alert("Could not access camera or microphone.");
+  });
 
-// Set up Remote Stream
-remoteStream = new MediaStream();
-remoteVideo.srcObject = remoteStream;
-peerConnection.ontrack = event => {
-  event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+// Handle Remote Stream
+peerConnection.ontrack = (event) => {
+  event.streams[0].getTracks().forEach((track) => {
+    remoteStream.addTrack(track);
+  });
+  console.log('Remote stream received');
 };
 
 // Collect ICE candidates and send them to Firestore
-peerConnection.onicecandidate = event => {
+peerConnection.onicecandidate = (event) => {
   if (event.candidate) {
     offerCandidates.add(event.candidate.toJSON());
+    console.log('ICE candidate sent');
   }
 };
 
@@ -69,28 +77,32 @@ async function makeCall() {
   const offer = { sdp: offerDescription.sdp, type: offerDescription.type };
   await callDoc.set({ offer });
 
+  console.log('Offer created and sent to Firestore');
+
   // Listen for answer
-  callDoc.onSnapshot(snapshot => {
+  callDoc.onSnapshot((snapshot) => {
     const data = snapshot.data();
-    if (!peerConnection.currentRemoteDescription && data?.answer) {
+    if (data?.answer) {
       const answerDescription = new RTCSessionDescription(data.answer);
       peerConnection.setRemoteDescription(answerDescription);
+      console.log('Answer received and set');
     }
   });
 
   // Listen for ICE candidates from the other user
-  answerCandidates.onSnapshot(snapshot => {
-    snapshot.docChanges().forEach(change => {
+  answerCandidates.onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
         const candidate = new RTCIceCandidate(change.doc.data());
         peerConnection.addIceCandidate(candidate);
+        console.log('ICE candidate added from answerCandidates');
       }
     });
   });
 }
 
 async function answerCall() {
-  callDoc.onSnapshot(async snapshot => {
+  callDoc.onSnapshot(async (snapshot) => {
     const data = snapshot.data();
     if (data?.offer) {
       const offerDescription = new RTCSessionDescription(data.offer);
@@ -102,31 +114,88 @@ async function answerCall() {
       // Save answer to Firestore
       const answer = { sdp: answerDescription.sdp, type: answerDescription.type };
       await callDoc.update({ answer });
+
+      console.log('Answer created and sent to Firestore');
     }
   });
 
   // Listen for ICE candidates from the caller
-  offerCandidates.onSnapshot(snapshot => {
-    snapshot.docChanges().forEach(change => {
+  offerCandidates.onSnapshot((snapshot) => {
+    snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
         const candidate = new RTCIceCandidate(change.doc.data());
         peerConnection.addIceCandidate(candidate);
+        console.log('ICE candidate added from offerCandidates');
       }
     });
   });
 
   // Collect ICE candidates for this user
-  peerConnection.onicecandidate = event => {
+  peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
       answerCandidates.add(event.candidate.toJSON());
+      console.log('Sending ICE candidate from answer');
     }
   };
 }
 
-// Choose action based on user role
+// Determine if the user is the caller or receiver
 const isCaller = confirm("Do you want to make the call?");
 if (isCaller) {
   makeCall();
 } else {
   answerCall();
+}
+
+// Draggable Self View Logic
+const selfView = document.querySelector('.self-view');
+let isDragging = false, startX, startY, initialX, initialY;
+
+selfView.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  initialX = selfView.offsetLeft;
+  initialY = selfView.offsetTop;
+  selfView.style.cursor = 'grabbing';
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  
+  // Constrain movement within the screen, accounting for the bottom gap
+  const containerRect = document.body.getBoundingClientRect();
+  const selfRect = selfView.getBoundingClientRect();
+
+  const newX = Math.min(
+    containerRect.width - selfRect.width,
+    Math.max(0, initialX + dx)
+  );
+  const newY = Math.min(
+    containerRect.height - selfRect.height - 20, /* Adjusted for bottom gap */
+    Math.max(0, initialY + dy)
+  );
+
+  selfView.style.left = `${newX}px`;
+  selfView.style.top = `${newY}px`;
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+  selfView.style.cursor = 'grab';
+});
+
+// Adjust Popup Position on Resize
+window.addEventListener('resize', () => {
+  const containerRect = document.body.getBoundingClientRect();
+  const selfRect = selfView.getBoundingClientRect();
+
+  if (selfRect.right > containerRect.width) {
+    selfView.style.left = `${containerRect.width - selfRect.width}px`;
   }
+  if (selfRect.bottom > containerRect.height - 20) { // Adjust for bottom gap
+    selfView.style.top = `${containerRect.height - selfRect.height - 20}px`;
+  }
+});
