@@ -32,7 +32,7 @@ document.addEventListener('mousemove', (e) => {
   const dx = e.clientX - startX;
   const dy = e.clientY - startY;
   
-  // Constrain movement within the screen
+  // Constrain movement within the screen, accounting for the bottom gap
   const containerRect = document.body.getBoundingClientRect();
   const selfRect = selfView.getBoundingClientRect();
 
@@ -41,7 +41,7 @@ document.addEventListener('mousemove', (e) => {
     Math.max(0, initialX + dx)
   );
   const newY = Math.min(
-    containerRect.height - selfRect.height,
+    containerRect.height - selfRect.height - 20, /* Adjusted for bottom gap */
     Math.max(0, initialY + dy)
   );
 
@@ -62,7 +62,7 @@ window.addEventListener('resize', () => {
   if (selfRect.right > containerRect.width) {
     selfView.style.left = `${containerRect.width - selfRect.width}px`;
   }
-  if (selfRect.bottom > containerRect.height) {
-    selfView.style.top = `${containerRect.height - selfRect.height}px`;
+  if (selfRect.bottom > containerRect.height - 20) { // Adjust for bottom gap
+    selfView.style.top = `${containerRect.height - selfRect.height - 20}px`;
   }
 });
