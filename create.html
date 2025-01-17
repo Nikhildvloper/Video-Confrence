@@ -25,11 +25,6 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .container h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
     textarea {
       width: 100%;
       height: 80px;
@@ -38,21 +33,16 @@
       font-size: 16px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      resize: none;
     }
 
     .btn {
-      display: inline-block;
-      margin: 10px;
       padding: 10px 20px;
       font-size: 16px;
-      font-weight: bold;
       color: #fff;
       background-color: #1d557d;
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
 
     .btn:hover {
@@ -61,8 +51,6 @@
 
     .message {
       margin-top: 20px;
-      font-size: 16px;
-      color: red;
     }
   </style>
 </head>
@@ -77,15 +65,15 @@
   <script>
     // Firebase configuration
     const firebaseConfig = {
-  apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
-  authDomain: "video-confrence-9e131.firebaseapp.com",
-  databaseURL: "https://video-confrence-9e131-default-rtdb.firebaseio.com",
-  projectId: "video-confrence-9e131",
-  storageBucket: "video-confrence-9e131.firebasestorage.app",
-  messagingSenderId: "299971534260",
-  appId: "1:299971534260:web:2a751958721d1181c3a6e1",
-  measurementId: "G-YHZFY3TSMT"
-};
+      apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
+      authDomain: "video-confrence-9e131.firebaseapp.com",
+      databaseURL: "https://video-confrence-9e131-default-rtdb.firebaseio.com",
+      projectId: "video-confrence-9e131",
+      storageBucket: "video-confrence-9e131.firebasestorage.app",
+      messagingSenderId: "299971534260",
+      appId: "1:299971534260:web:2a751958721d1181c3a6e1",
+      measurementId: "G-YHZFY3TSMT"
+    };
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
@@ -100,28 +88,28 @@
       const roomName = roomNameInput.value.trim();
 
       if (!roomName) {
-        message.textContent = "Room name cannot be empty.";
+        message.textContent = 'Room name cannot be empty!';
+        message.style.color = 'red';
         return;
       }
 
-      // Check if room name already exists in Firebase
-      const roomRef = firebase.database().ref('rooms/' + roomName);
-      roomRef.get().then((snapshot) => {
+      const roomRef = database.ref('rooms/' + roomName);
+
+      roomRef.once('value', (snapshot) => {
         if (snapshot.exists()) {
-          message.textContent = "Room name already exists. Please choose another name.";
+          message.textContent = 'Room name already exists!';
+          message.style.color = 'red';
         } else {
-          // Create room in Firebase
-          roomRef.set({ createdAt: new Date().toISOString() })
-            .then(() => {
-              message.textContent = "Room created successfully!";
-              message.style.color = "green";
-            })
-            .catch((error) => {
-              message.textContent = "Error creating room: " + error.message;
-            });
+          roomRef.set({
+            createdAt: new Date().toISOString()
+          }).then(() => {
+            message.textContent = 'Room created successfully!';
+            message.style.color = 'green';
+          }).catch((error) => {
+            message.textContent = 'Error: ' + error.message;
+            message.style.color = 'red';
+          });
         }
-      }).catch((error) => {
-        message.textContent = "Error checking room: " + error.message;
       });
     });
   </script>
