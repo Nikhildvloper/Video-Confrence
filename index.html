@@ -3,18 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Video Call</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Room Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .container h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #1d557d;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #164962;
+    }
+  </style>
 </head>
 <body>
-  <div class="video-container">
-    <video id="remoteVideo" autoplay playsinline></video>
-    <div class="self-view">
-      <video id="selfVideo" autoplay playsinline muted></video>
-    </div>
+  <div class="container">
+    <h1>Room Management</h1>
+    <button class="btn" id="createRoom">Create Room</button>
+    <button class="btn" id="joinRoom">Join Room</button>
   </div>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
-  <script src="script1.js"></script>
+
+  <script>
+    document.getElementById('createRoom').addEventListener('click', () => {
+      window.location.href = 'create.html'; // Redirects to create.html
+    });
+
+    document.getElementById('joinRoom').addEventListener('click', () => {
+      window.location.href = 'join.html'; // Redirects to join.html
+    });
+  </script>
 </body>
 </html>
