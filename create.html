@@ -7,63 +7,22 @@
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f4f4f9;
-    }
-
-    .container {
-      text-align: center;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    textarea {
-      width: 100%;
-      height: 80px;
-      margin-bottom: 20px;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .btn {
-      padding: 10px 20px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #1d557d;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #164962;
-    }
-
-    .message {
-      margin-top: 20px;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .container { margin-top: 50px; }
+    textarea { width: 80%; height: 50px; margin-bottom: 20px; }
+    .btn { background-color: #4CAF50; color: white; padding: 15px 20px; border: none; cursor: pointer; }
+    .btn:hover { background-color: #45a049; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Create Room</h1>
     <textarea id="roomName" placeholder="Enter room name..."></textarea>
-    <button class="btn" id="createButton">Create</button>
-    <div class="message" id="message"></div>
+    <button class="btn" id="createButton">Create Room</button>
+    <p id="message"></p>
   </div>
 
   <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
       authDomain: "video-confrence-9e131.firebaseapp.com",
@@ -79,35 +38,33 @@
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Elements
-    const roomNameInput = document.getElementById('roomName');
     const createButton = document.getElementById('createButton');
+    const roomNameInput = document.getElementById('roomName');
     const message = document.getElementById('message');
 
     createButton.addEventListener('click', () => {
       const roomName = roomNameInput.value.trim();
-
-      if (!roomName) {
-        message.textContent = 'Room name cannot be empty!';
-        message.style.color = 'red';
+      if (roomName === "") {
+        message.textContent = "Room name cannot be empty!";
+        message.style.color = "red";
         return;
       }
 
       const roomRef = database.ref('rooms/' + roomName);
 
-      roomRef.once('value', (snapshot) => {
+      roomRef.once('value').then((snapshot) => {
         if (snapshot.exists()) {
-          message.textContent = 'Room name already exists!';
-          message.style.color = 'red';
+          message.textContent = "Room already exists!";
+          message.style.color = "red";
         } else {
           roomRef.set({
             createdAt: new Date().toISOString()
           }).then(() => {
-            message.textContent = 'Room created successfully!';
-            message.style.color = 'green';
+            message.textContent = "Room created successfully!";
+            message.style.color = "green";
           }).catch((error) => {
-            message.textContent = 'Error: ' + error.message;
-            message.style.color = 'red';
+            message.textContent = "Error: " + error.message;
+            message.style.color = "red";
           });
         }
       });
