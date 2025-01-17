@@ -70,7 +70,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
   <script>
-    // Firebase Configuration
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
       authDomain: "video-confrence-9e131.firebaseapp.com",
@@ -83,27 +83,42 @@
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
+
     const database = firebase.database();
+    const textRef = database.ref('text');
+    let lastSyncedText = "";
 
-    const textArea = document.getElementById('textArea');
-    const createButton = document.getElementById('createButton');
+    // Function to sync text area
+    function syncTextArea(textArea) {
+      textRef.on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data && data !== lastSyncedText) {
+          lastSyncedText = data;
+          textArea.value = data;
+        }
+      });
+    }
 
-    // Reference to the Firebase Realtime Database location for the room's text
-    const roomRef = database.ref('text');
-
-    // Sync text area changes to Firebase
-    createButton.addEventListener('click', () => {
-      const text = textArea.value;
-      roomRef.set(text); // Sync the text to the database
-    });
-
-    // Sync Firebase text changes to the text area
-    roomRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data !== null) {
-        textArea.value = data; // Update the text area with the synced value
+    // Function to update text area
+    function updateTextArea(textArea) {
+      const newText = textArea.value;
+      if (newText !== lastSyncedText) {
+        lastSyncedText = newText;
+        textRef.set(newText);
       }
+    }
+
+    // DOMContentLoaded event handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const textArea = document.getElementById('textArea');
+      const createButton = document.getElementById('createButton');
+
+      createButton.addEventListener('click', () => {
+        updateTextArea(textArea);
+      });
+
+      syncTextArea(textArea);
     });
   </script>
 </body>
