@@ -7,50 +7,16 @@
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f4f4f9;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .rooms {
-      margin-top: 20px;
-    }
-
-    .room-btn {
-      display: block;
-      padding: 10px 20px;
-      font-size: 16px;
-      color: #fff;
-      background-color: #1d557d;
-      border: none;
-      border-radius: 5px;
-      margin: 5px 0;
-      cursor: pointer;
-    }
-
-    .room-btn:hover {
-      background-color: #164962;
-    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; text-align: center; }
+    .room-btn { padding: 10px 20px; margin: 10px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    .room-btn:hover { background-color: #45a049; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Available Rooms</h1>
-    <div class="rooms" id="roomsContainer">
-      <!-- Buttons will be added dynamically -->
-    </div>
-  </div>
+  <h1>Available Rooms</h1>
+  <div id="roomsContainer"></div>
 
   <script>
-    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
       authDomain: "video-confrence-9e131.firebaseapp.com",
@@ -66,27 +32,24 @@
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Reference to rooms in Firebase
-    const roomsContainer = document.getElementById('roomsContainer');
     const roomsRef = database.ref('rooms');
+    const roomsContainer = document.getElementById('roomsContainer');
 
-    // Listen for real-time updates
     roomsRef.on('value', (snapshot) => {
-      roomsContainer.innerHTML = ''; // Clear the container
-      if (snapshot.exists()) {
-        const rooms = snapshot.val();
+      roomsContainer.innerHTML = ''; // Clear existing rooms
+      const rooms = snapshot.val();
+      if (rooms) {
         Object.keys(rooms).forEach((roomName) => {
-          const button = document.createElement('button');
-          button.className = 'room-btn';
-          button.textContent = roomName;
-          button.onclick = () => {
-            alert(`Joining room: ${roomName}`);
-            // Add your room joining logic here
+          const roomButton = document.createElement('button');
+          roomButton.className = 'room-btn';
+          roomButton.textContent = roomName;
+          roomButton.onclick = () => {
+            alert('Joining room: ' + roomName);
           };
-          roomsContainer.appendChild(button);
+          roomsContainer.appendChild(roomButton);
         });
       } else {
-        roomsContainer.innerHTML = '<p>No rooms available.</p>';
+        roomsContainer.innerHTML = "<p>No rooms available.</p>";
       }
     });
   </script>
