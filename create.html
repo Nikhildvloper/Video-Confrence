@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Room</title>
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .container h1 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      height: 80px;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: none;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #1d557d;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #164962;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Create Room</h1>
+    <textarea id="roomName" placeholder="Enter room name..."></textarea>
+    <button class="btn" id="createButton">Create</button>
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyAnvbxwW94UfEHHJEsVFFruyP20taJPqZo",
+  authDomain: "video-confrence-9e131.firebaseapp.com",
+  databaseURL: "https://video-confrence-9e131-default-rtdb.firebaseio.com",
+  projectId: "video-confrence-9e131",
+  storageBucket: "video-confrence-9e131.firebasestorage.app",
+  messagingSenderId: "299971534260",
+  appId: "1:299971534260:web:2a751958721d1181c3a6e1",
+  measurementId: "G-YHZFY3TSMT"
+};
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Elements
+    const roomNameInput = document.getElementById('roomName');
+    const createButton = document.getElementById('createButton');
+    const message = document.getElementById('message');
+
+    createButton.addEventListener('click', () => {
+      const roomName = roomNameInput.value.trim();
+
+      if (!roomName) {
+        message.textContent = "Room name cannot be empty.";
+        return;
+      }
+
+      // Check if room name already exists in Firebase
+      const roomRef = firebase.database().ref('rooms/' + roomName);
+      roomRef.get().then((snapshot) => {
+        if (snapshot.exists()) {
+          message.textContent = "Room name already exists. Please choose another name.";
+        } else {
+          // Create room in Firebase
+          roomRef.set({ createdAt: new Date().toISOString() })
+            .then(() => {
+              message.textContent = "Room created successfully!";
+              message.style.color = "green";
+            })
+            .catch((error) => {
+              message.textContent = "Error creating room: " + error.message;
+            });
+        }
+      }).catch((error) => {
+        message.textContent = "Error checking room: " + error.message;
+      });
+    });
+  </script>
+</body>
+</html>
